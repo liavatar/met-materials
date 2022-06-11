@@ -85,6 +85,8 @@ pipelineDescriptor.vertexDescriptor =
 let pipelineState =
   try device.makeRenderPipelineState(descriptor: pipelineDescriptor)
 
+// Create the following for every new frame
+
 // 1
 guard let commandBuffer = commandQueue.makeCommandBuffer(),
 // 2

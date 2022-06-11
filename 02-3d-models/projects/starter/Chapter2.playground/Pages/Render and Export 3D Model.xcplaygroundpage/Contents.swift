@@ -15,12 +15,35 @@ view.enableSetNeedsDisplay = false
 
 let allocator = MTKMeshBufferAllocator(device: device)
 let mdlMesh = MDLMesh(
-  sphereWithExtent: [0.75, 0.75, 0.75],
-  segments: [100, 100],
+  coneWithExtent: [1,1,1],
+  segments: [10, 10],
   inwardNormals: false,
+  cap: true,
   geometryType: .triangles,
   allocator: allocator)
+
 let mesh = try MTKMesh(mesh: mdlMesh, device: device)
+
+// MARK: - begin export code
+// begin export code
+// 1
+let asset = MDLAsset()
+asset.add(mdlMesh)
+// 2
+let fileExtension = "obj"
+guard MDLAsset.canExportFileExtension(fileExtension) else {
+  fatalError("Can't export a .\(fileExtension) format")
+}
+// 3
+do {
+  let url = playgroundSharedDataDirectory
+    .appendingPathComponent("primitive.\(fileExtension)")
+  try asset.export(to: url)
+} catch {
+  fatalError("Error \(error.localizedDescription)")
+}
+// end export code
+
 
 guard let commandQueue = device.makeCommandQueue() else {
   fatalError("Could not create a command queue")
@@ -79,6 +102,9 @@ renderEncoder.setVertexBuffer(
 guard let submesh = mesh.submeshes.first else {
  fatalError()
 }
+
+// MARK: - set line mode
+renderEncoder.setTriangleFillMode(.lines)
 
 renderEncoder.drawIndexedPrimitives(
   type: .triangle,

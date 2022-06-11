@@ -14,13 +14,31 @@ view.isPaused = true
 view.enableSetNeedsDisplay = false
 
 let allocator = MTKMeshBufferAllocator(device: device)
-let mdlMesh = MDLMesh(
-  coneWithExtent: [1, 1, 1],
-  segments: [10, 10],
-  inwardNormals: false,
-  cap: true,
-  geometryType: .triangles,
-  allocator: allocator)
+
+// MARK: - import object from Blender
+guard let assetURL = Bundle.main.url(
+  forResource: "train",
+  withExtension: "obj") else {
+  fatalError()
+}
+
+let vertexDescriptor = MTLVertexDescriptor()
+vertexDescriptor.attributes[0].format = .float3
+vertexDescriptor.attributes[0].offset = 0
+vertexDescriptor.attributes[0].bufferIndex = 0
+
+vertexDescriptor.layouts[0].stride = MemoryLayout<SIMD3<Float>>.stride
+let meshDescriptor = MTKModelIOVertexDescriptorFromMetal(vertexDescriptor)
+(meshDescriptor.attributes[0] as! MDLVertexAttribute).name = MDLVertexAttributePosition
+
+let asset = MDLAsset(
+  url: assetURL,
+  vertexDescriptor: meshDescriptor,
+  bufferAllocator: allocator)
+let mdlMesh = asset.childObjects(of: MDLMesh.self).first as! MDLMesh
+
+// the end of import
+
 let mesh = try MTKMesh(mesh: mdlMesh, device: device)
 
 guard let commandQueue = device.makeCommandQueue() else {
@@ -78,16 +96,15 @@ renderEncoder.setVertexBuffer(
   index: 0)
 renderEncoder.setTriangleFillMode(.lines)
 
-guard let submesh = mesh.submeshes.first else {
- fatalError()
+for submesh in mesh.submeshes {
+  renderEncoder.drawIndexedPrimitives(
+    type: .triangle,
+    indexCount: submesh.indexCount,
+    indexType: submesh.indexType,
+    indexBuffer: submesh.indexBuffer.buffer,
+    indexBufferOffset: submesh.indexBuffer.offset
+  )
 }
-
-renderEncoder.drawIndexedPrimitives(
-  type: .triangle,
-  indexCount: submesh.indexCount,
-  indexType: submesh.indexType,
-  indexBuffer: submesh.indexBuffer.buffer,
-  indexBufferOffset: 0)
 
 renderEncoder.endEncoding()
 guard let drawable = view.currentDrawable else { fatalError() }
