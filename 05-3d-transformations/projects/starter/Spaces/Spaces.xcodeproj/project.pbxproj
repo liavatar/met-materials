@@ -7,12 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0AC68A422855B344000D076A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 820EACD8267C1D8500570060 /* ContentView.swift */; };
 		820D871526A77DE300EF4F10 /* VertexDescriptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 820D871426A77DE300EF4F10 /* VertexDescriptor.swift */; };
 		820D871626A77DE300EF4F10 /* VertexDescriptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 820D871426A77DE300EF4F10 /* VertexDescriptor.swift */; };
 		820EACE5267C1D8600570060 /* ShadersApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 820EACD7267C1D8500570060 /* ShadersApp.swift */; };
 		820EACE6267C1D8600570060 /* ShadersApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 820EACD7267C1D8500570060 /* ShadersApp.swift */; };
 		820EACE7267C1D8600570060 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 820EACD8267C1D8500570060 /* ContentView.swift */; };
-		820EACE8267C1D8600570060 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 820EACD8267C1D8500570060 /* ContentView.swift */; };
 		820EACE9267C1D8600570060 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 820EACD9267C1D8600570060 /* Assets.xcassets */; };
 		820EACEA267C1D8600570060 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 820EACD9267C1D8600570060 /* Assets.xcassets */; };
 		820EACF7267C262F00570060 /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 820EACF6267C262F00570060 /* Renderer.swift */; };
@@ -251,9 +251,9 @@
 			files = (
 				820D871626A77DE300EF4F10 /* VertexDescriptor.swift in Sources */,
 				8289B17C267C690B0062BFCD /* Shaders.metal in Sources */,
+				0AC68A422855B344000D076A /* ContentView.swift in Sources */,
 				820EACF8267C262F00570060 /* Renderer.swift in Sources */,
 				82D99CA1267C79C000505CDB /* MetalView.swift in Sources */,
-				820EACE8267C1D8600570060 /* ContentView.swift in Sources */,
 				820EACE6267C1D8600570060 /* ShadersApp.swift in Sources */,
 				82AF9DB826AE70E4003ACBFC /* Triangle.swift in Sources */,
 			);
