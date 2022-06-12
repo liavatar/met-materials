@@ -1,34 +1,4 @@
-/// Copyright (c) 2022 Razeware LLC
-///
-/// Permission is hereby granted, free of charge, to any person obtaining a copy
-/// of this software and associated documentation files (the "Software"), to deal
-/// in the Software without restriction, including without limitation the rights
-/// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-/// copies of the Software, and to permit persons to whom the Software is
-/// furnished to do so, subject to the following conditions:
-///
-/// The above copyright notice and this permission notice shall be included in
-/// all copies or substantial portions of the Software.
-///
-/// Notwithstanding the foregoing, you may not use, copy, modify, merge, publish,
-/// distribute, sublicense, create a derivative work, and/or sell copies of the
-/// Software in any work that is designed, intended, or marketed for pedagogical or
-/// instructional purposes related to programming, coding, application development,
-/// or information technology.  Permission for such use, copying, modification,
-/// merger, publication, distribution, sublicensing, creation of derivative works,
-/// or sale is expressly withheld.
-///
-/// This project and source code may use libraries or frameworks that are
-/// released under various Open-Source licenses. Use of those libraries and
-/// frameworks are governed by their own individual licenses.
-///
-/// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-/// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-/// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-/// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-/// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-/// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-/// THE SOFTWARE.
+
 
 import MetalKit
 
@@ -39,6 +9,13 @@ class Renderer: NSObject {
   static var commandQueue: MTLCommandQueue!
   static var library: MTLLibrary!
   var pipelineState: MTLRenderPipelineState!
+  
+  // MARK: - adding quad and timer
+  var timer: Float = 0
+  // because we initialize device in init(metalView:), we must initialize quad lazily
+  lazy var quad: Quad = {
+    Quad(device: Renderer.device, scale: 0.8)
+  }()
 
   init(metalView: MTKView) {
     guard
@@ -63,6 +40,10 @@ class Renderer: NSObject {
     pipelineDescriptor.fragmentFunction = fragmentFunction
     pipelineDescriptor.colorAttachments[0].pixelFormat =
       metalView.colorPixelFormat
+    
+    // MARK: - 3, adding vertex descriptor
+    pipelineDescriptor.vertexDescriptor = MTLVertexDescriptor.defaultLayout
+
     do {
       pipelineState =
         try device.makeRenderPipelineState(
@@ -97,10 +78,55 @@ extension Renderer: MTKViewDelegate {
           descriptor: descriptor) else {
         return
     }
+    
     renderEncoder.setRenderPipelineState(pipelineState)
+    
+    // MARK: - send timer to GPU
+    timer += 0.005
+    var currentTime = sin(timer)
+    renderEncoder.setVertexBytes(
+      &currentTime,
+      length: MemoryLayout<Float>.stride,
+      index: 11)
 
     // do drawing here
+    // MARK: - quad rendering
+    renderEncoder.setVertexBuffer(
+      quad.vertexBuffer,
+      offset: 0,
+      index: 0)
+    
+//    renderEncoder.drawPrimitives(
+//      type: .triangle,
+//      vertexStart: 0,
+//      vertexCount: quad.vertices.count)
 
+//    // MARK: - 2 quad rendering using vertex index
+//    renderEncoder.setVertexBuffer(
+//      quad.indexBuffer,
+//      offset: 0,
+//      index: 1)
+//    renderEncoder.drawPrimitives(
+//      type: .triangle,
+//      vertexStart: 0,
+//      vertexCount: quad.indices.count)
+    
+    // MARK: - 4 adding color buffer
+    renderEncoder.setVertexBuffer(
+      quad.colorBuffer,
+      offset: 0,
+      index: 1)
+
+    // MARK: - 3 using vertex descriptor and indexedPrimitive to draw
+    renderEncoder.drawIndexedPrimitives(
+      // type: .triangle,
+      type: .point,
+      indexCount: quad.indices.count,
+      indexType: .uint16,
+      indexBuffer: quad.indexBuffer,
+      indexBufferOffset: 0)
+
+    
     renderEncoder.endEncoding()
     guard let drawable = view.currentDrawable else {
       return

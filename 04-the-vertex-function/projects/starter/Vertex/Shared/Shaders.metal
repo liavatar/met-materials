@@ -1,43 +1,68 @@
-/// Copyright (c) 2022 Razeware LLC
-///
-/// Permission is hereby granted, free of charge, to any person obtaining a copy
-/// of this software and associated documentation files (the "Software"), to deal
-/// in the Software without restriction, including without limitation the rights
-/// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-/// copies of the Software, and to permit persons to whom the Software is
-/// furnished to do so, subject to the following conditions:
-///
-/// The above copyright notice and this permission notice shall be included in
-/// all copies or substantial portions of the Software.
-///
-/// Notwithstanding the foregoing, you may not use, copy, modify, merge, publish,
-/// distribute, sublicense, create a derivative work, and/or sell copies of the
-/// Software in any work that is designed, intended, or marketed for pedagogical or
-/// instructional purposes related to programming, coding, application development,
-/// or information technology.  Permission for such use, copying, modification,
-/// merger, publication, distribution, sublicensing, creation of derivative works,
-/// or sale is expressly withheld.
-///
-/// This project and source code may use libraries or frameworks that are
-/// released under various Open-Source licenses. Use of those libraries and
-/// frameworks are governed by their own individual licenses.
-///
-/// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-/// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-/// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-/// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-/// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-/// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-/// THE SOFTWARE.
+
 
 #include <metal_stdlib>
 using namespace metal;
 
+// MARK: - vertex shader for simple quad rendering (including a timer float variable)
+// changing from float3 to packed_float3 to avoid SIMD_float3 padding from 3 bytes to 4 bytes
+//vertex float4 vertex_main(
+//  constant packed_float3 *vertices [[buffer(0)]],
+//  constant ushort *indices [[buffer(1)]], // using vertex index
+//  constant float &timer [[buffer(11)]],
+//  uint vertexID [[vertex_id]])
+//{
+//  //float4 position = float4(vertices[vertexID], 1);
+//  float4 position = float4(vertices[indices[vertexID]], 1); // using vertex index
+//  position.y += timer;
+//  return position;
+//}
 
-vertex float4 vertex_main() {
-  return float4(0, 0, 1, 1);
+// MARK: - 3 using vertex descriptor
+// describe each per-vertex input with the [[stage_in]] attribute. The GPU now looks at the pipeline state’s vertex descriptor.
+// [[attribute(0)]] is the attribute in the vertex descriptor that describes the position.
+
+//vertex float4 vertex_main(
+//  float4 position [[attribute(0)]] [[stage_in]],
+//  constant float &timer [[buffer(11)]])
+//{
+//  return position;
+//}
+
+// MARK: - 4 adding color to vertex
+// You can only use [[stage_in]] on one parameter, so create a new VertexIn structure:
+
+struct VertexIn {
+  float4 position [[attribute(0)]];
+  float4 color [[attribute(1)]];
+};
+
+// MARK: - 5 adding color output
+struct VertexOut {
+  float4 position [[position]];
+  float4 color;
+  float pointSize [[point_size]]; //The [[point_size]] attribute will tell the GPU what point size to use.
+};
+
+vertex VertexOut vertex_main(
+  VertexIn vIn [[stage_in]],
+  constant float &timer [[buffer(11)]])
+{
+  vIn.position.y += timer;
+  // return vIn.position;
+  
+  // MARK: - 5 adding color output
+  VertexOut vOut {
+    .position = vIn.position,
+    .color = vIn.color,
+    .pointSize = 30
+  };
+  return vOut;
 }
 
-fragment float4 fragment_main() {
-  return float4(0, 0, 1, 1);
+fragment float4 fragment_main(VertexOut fIn [[stage_in]]) {
+  return fIn.color;
 }
+
+//fragment float4 fragment_main() {
+//  return float4(0, 0, 1, 1);
+//}

@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0AC68A3F28556F15000D076A /* Quad.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AC68A3E28556F15000D076A /* Quad.swift */; };
+		0AC68A4128557B5E000D076A /* VertexDescriptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AC68A4028557B5E000D076A /* VertexDescriptor.swift */; };
 		820EACE5267C1D8600570060 /* VertexApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 820EACD7267C1D8500570060 /* VertexApp.swift */; };
 		820EACE6267C1D8600570060 /* VertexApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 820EACD7267C1D8500570060 /* VertexApp.swift */; };
 		820EACE7267C1D8600570060 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 820EACD8267C1D8500570060 /* ContentView.swift */; };
@@ -22,6 +24,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0AC68A3E28556F15000D076A /* Quad.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Quad.swift; sourceTree = "<group>"; };
+		0AC68A4028557B5E000D076A /* VertexDescriptor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VertexDescriptor.swift; sourceTree = "<group>"; };
 		820EACD7267C1D8500570060 /* VertexApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VertexApp.swift; sourceTree = "<group>"; };
 		820EACD8267C1D8500570060 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		820EACD9267C1D8600570060 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -50,6 +54,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0AC68A3D28556EFF000D076A /* New */ = {
+			isa = PBXGroup;
+			children = (
+				0AC68A3E28556F15000D076A /* Quad.swift */,
+				0AC68A4028557B5E000D076A /* VertexDescriptor.swift */,
+			);
+			name = New;
+			sourceTree = "<group>";
+		};
 		820EACD1267C1D8500570060 = {
 			isa = PBXGroup;
 			children = (
@@ -66,6 +79,7 @@
 				820EACF6267C262F00570060 /* Renderer.swift */,
 				82D99C9F267C79C000505CDB /* MetalView.swift */,
 				8289B17A267C690B0062BFCD /* Shaders.metal */,
+				0AC68A3D28556EFF000D076A /* New */,
 				820EACD9267C1D8600570060 /* Assets.xcassets */,
 			);
 			path = Shared;
@@ -219,6 +233,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0AC68A4128557B5E000D076A /* VertexDescriptor.swift in Sources */,
+				0AC68A3F28556F15000D076A /* Quad.swift in Sources */,
 				8289B17B267C690B0062BFCD /* Shaders.metal in Sources */,
 				820EACF7267C262F00570060 /* Renderer.swift in Sources */,
 				82D99CA0267C79C000505CDB /* MetalView.swift in Sources */,
