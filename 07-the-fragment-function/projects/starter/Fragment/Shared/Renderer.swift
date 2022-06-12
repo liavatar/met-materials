@@ -1,34 +1,4 @@
-/// Copyright (c) 2022 Razeware LLC
-///
-/// Permission is hereby granted, free of charge, to any person obtaining a copy
-/// of this software and associated documentation files (the "Software"), to deal
-/// in the Software without restriction, including without limitation the rights
-/// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-/// copies of the Software, and to permit persons to whom the Software is
-/// furnished to do so, subject to the following conditions:
-///
-/// The above copyright notice and this permission notice shall be included in
-/// all copies or substantial portions of the Software.
-///
-/// Notwithstanding the foregoing, you may not use, copy, modify, merge, publish,
-/// distribute, sublicense, create a derivative work, and/or sell copies of the
-/// Software in any work that is designed, intended, or marketed for pedagogical or
-/// instructional purposes related to programming, coding, application development,
-/// or information technology.  Permission for such use, copying, modification,
-/// merger, publication, distribution, sublicensing, creation of derivative works,
-/// or sale is expressly withheld.
-///
-/// This project and source code may use libraries or frameworks that are
-/// released under various Open-Source licenses. Use of those libraries and
-/// frameworks are governed by their own individual licenses.
-///
-/// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-/// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-/// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-/// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-/// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-/// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-/// THE SOFTWARE.
+
 
 import MetalKit
 
@@ -50,6 +20,10 @@ class Renderer: NSObject {
 
   var timer: Float = 0
   var uniforms = Uniforms()
+  
+  var  params = Params()
+  let depthStencilState: MTLDepthStencilState?
+
 
   init(metalView: MTKView, options: Options) {
     guard
@@ -73,28 +47,27 @@ class Renderer: NSObject {
     let pipelineDescriptor = MTLRenderPipelineDescriptor()
     pipelineDescriptor.vertexFunction = quadVertexFunction
     pipelineDescriptor.fragmentFunction = fragmentFunction
-    pipelineDescriptor.colorAttachments[0].pixelFormat =
-      metalView.colorPixelFormat
+    pipelineDescriptor.colorAttachments[0].pixelFormat = metalView.colorPixelFormat
+    pipelineDescriptor.depthAttachmentPixelFormat = .depth32Float
     do {
-      quadPipelineState =
-      try device.makeRenderPipelineState(
-        descriptor: pipelineDescriptor)
+      quadPipelineState = try device.makeRenderPipelineState(descriptor: pipelineDescriptor)
       pipelineDescriptor.vertexFunction = modelVertexFunction
-      pipelineDescriptor.vertexDescriptor =
-        MTLVertexDescriptor.defaultLayout
-      modelPipelineState =
-        try device.makeRenderPipelineState(
-          descriptor: pipelineDescriptor)
+      pipelineDescriptor.vertexDescriptor = MTLVertexDescriptor.defaultLayout
+      modelPipelineState = try device.makeRenderPipelineState(descriptor: pipelineDescriptor)
     } catch let error {
       fatalError(error.localizedDescription)
     }
     self.options = options
+    depthStencilState = Renderer.buildDepthStencilState()
+    
     super.init()
     metalView.clearColor = MTLClearColor(
       red: 1.0,
       green: 1.0,
       blue: 0.9,
       alpha: 1.0)
+    metalView.depthStencilPixelFormat = .depth32Float // depth stencil test
+    
     metalView.delegate = self
     mtkView(metalView, drawableSizeWillChange: metalView.bounds.size)
   }
@@ -114,6 +87,10 @@ extension Renderer: MTKViewDelegate {
         far: 100,
         aspect: aspect)
     uniforms.projectionMatrix = projectionMatrix
+    
+    params.width = UInt32(size.width)
+    params.height = UInt32(size.height)
+
   }
 
   func renderModel(encoder: MTLRenderCommandEncoder) {
@@ -127,7 +104,7 @@ extension Renderer: MTKViewDelegate {
     encoder.setVertexBytes(
       &uniforms,
       length: MemoryLayout<Uniforms>.stride,
-      index: 11)
+      index: Int(UniformsBuffer.rawValue))
 
     model.render(encoder: encoder)
   }
@@ -141,11 +118,17 @@ extension Renderer: MTKViewDelegate {
     guard
       let commandBuffer = Renderer.commandQueue.makeCommandBuffer(),
       let descriptor = view.currentRenderPassDescriptor,
-      let renderEncoder =
-        commandBuffer.makeRenderCommandEncoder(
-          descriptor: descriptor) else {
+      let renderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: descriptor)
+    else {
         return
     }
+
+    renderEncoder.setDepthStencilState(depthStencilState)
+
+    renderEncoder.setFragmentBytes(
+      &params,
+      length: MemoryLayout<Uniforms>.stride,
+      index: 12)
 
     if options.renderChoice == .train {
       renderModel(encoder: renderEncoder)
@@ -160,4 +143,13 @@ extension Renderer: MTKViewDelegate {
     commandBuffer.present(drawable)
     commandBuffer.commit()
   }
+  
+  static func buildDepthStencilState() -> MTLDepthStencilState? {
+
+    let descriptor = MTLDepthStencilDescriptor()
+    descriptor.depthCompareFunction = .less
+    descriptor.isDepthWriteEnabled = true
+    return Renderer.device.makeDepthStencilState(descriptor: descriptor)
+  }
+
 }
