@@ -41,6 +41,8 @@ struct GameScene {
   }()
   var models: [Model] = []
   var camera = ArcballCamera()
+  
+  let lighting = SceneLighting()
 
   var defaultView: Transform {
     Transform(

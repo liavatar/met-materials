@@ -54,7 +54,7 @@ class GameController: NSObject {
 extension GameController: MTKViewDelegate {
   func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
     scene.update(size: size)
-    renderer.mtkView(view, drawableSizeWillChange: size)
+    renderer.mtkView(view, drawableSizeWillChange: size) // might not be needed any more
   }
 
   func draw(in view: MTKView) {
