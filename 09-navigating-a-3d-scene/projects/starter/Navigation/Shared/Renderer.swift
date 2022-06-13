@@ -43,19 +43,12 @@ class Renderer: NSObject {
   var pipelineState: MTLRenderPipelineState!
   let depthStencilState: MTLDepthStencilState?
 
-  var timer: Float = 0
+  var lastTime: Double = CFAbsoluteTimeGetCurrent()
+
   var uniforms = Uniforms()
   var params = Params()
 
-  // the models to render
-  lazy var house: Model = {
-    Model(name: "lowpoly-house.obj")
-  }()
-  lazy var ground: Model = {
-    var ground = Model(name: "plane.obj")
-    ground.tiling = 16
-    return ground
-  }()
+  lazy var scene = GameScene()
 
   init(metalView: MTKView, options: Options) {
     guard
@@ -117,16 +110,7 @@ extension Renderer: MTKViewDelegate {
     _ view: MTKView,
     drawableSizeWillChange size: CGSize
   ) {
-    let aspect =
-      Float(view.bounds.width) / Float(view.bounds.height)
-    let projectionMatrix =
-      float4x4(
-        projectionFov: Float(70).degreesToRadians,
-        near: 0.1,
-        far: 100,
-        aspect: aspect)
-    uniforms.projectionMatrix = projectionMatrix
-
+    scene.update(size: size)
     params.width = UInt32(size.width)
     params.height = UInt32(size.height)
   }
@@ -141,23 +125,23 @@ extension Renderer: MTKViewDelegate {
         return
     }
 
-    timer += 0.005
-    uniforms.viewMatrix = float4x4(translation: [0, 1.5, -5]).inverse
-
     renderEncoder.setDepthStencilState(depthStencilState)
     renderEncoder.setRenderPipelineState(pipelineState)
 
-    // update and render
-    house.rotation.y = sin(timer)
-    house.render(encoder: renderEncoder, uniforms: uniforms, params: params)
+    let currentTime = CFAbsoluteTimeGetCurrent()
+    let deltaTime = Float(currentTime - lastTime)
+    lastTime = currentTime
+    scene.update(deltaTime: deltaTime)
 
-    ground.scale = 40
-    ground.rotation.y = sin(timer)
-    ground.render(
-      encoder: renderEncoder,
-      uniforms: uniforms,
-      params: params)
-    // end update and render
+    uniforms.viewMatrix = scene.camera.viewMatrix
+    uniforms.projectionMatrix = scene.camera.projectionMatrix
+
+    for model in scene.models {
+      model.render(
+        encoder: renderEncoder,
+        uniforms: uniforms,
+        params: params)
+    }
 
     renderEncoder.endEncoding()
     guard let drawable = view.currentDrawable else {
