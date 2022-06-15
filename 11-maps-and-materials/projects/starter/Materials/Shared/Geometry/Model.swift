@@ -54,9 +54,31 @@ class Model: Transformable {
       url: assetURL,
       vertexDescriptor: meshDescriptor,
       bufferAllocator: allocator)
-    let (mdlMeshes, mtkMeshes) = try! MTKMesh.newMeshes(
-      asset: asset,
-      device: Renderer.device)
+    
+//    let (mdlMeshes, mtkMeshes) = try! MTKMesh.newMeshes(
+//      asset: asset,
+//      device: Renderer.device)
+    
+    // change from above in order to remove vertex normal smoothing or add Tangent by ModelIO
+    var mtkMeshes: [MTKMesh] = []
+    let mdlMeshes = asset.childObjects(of: MDLMesh.self) as? [MDLMesh] ?? []
+    _ = mdlMeshes.map { mdlMesh in
+//      mdlMesh.addNormals(
+//        withAttributeNamed: MDLVertexAttributeNormal,
+//        creaseThreshold: 1.0)
+      mdlMesh.addTangentBasis(
+        forTextureCoordinateAttributeNamed:
+          MDLVertexAttributeTextureCoordinate,
+        tangentAttributeNamed: MDLVertexAttributeTangent,
+        bitangentAttributeNamed: MDLVertexAttributeBitangent)
+
+      mtkMeshes.append(
+        try! MTKMesh(
+          mesh: mdlMesh,
+          device: Renderer.device)
+      )
+    }
+    
     meshes = zip(mdlMeshes, mtkMeshes).map {
       Mesh(mdlMesh: $0.0, mtkMesh: $0.1)
     }
@@ -88,6 +110,7 @@ extension Model {
       index: ParamsBuffer.index)
 
     for mesh in meshes {
+      // loop through all the vertex buffers (including Tangent), setup by VertexDescriptor.swift
       for (index, vertexBuffer) in mesh.vertexBuffers.enumerated() {
         encoder.setVertexBuffer(
           vertexBuffer,
@@ -101,6 +124,21 @@ extension Model {
         encoder.setFragmentTexture(
           submesh.textures.baseColor,
           index: BaseColor.index)
+        
+        // set the fragment normal texture
+        encoder.setFragmentTexture(
+          submesh.textures.normal,
+          index: NormalTexture.index)
+        
+        encoder.setFragmentTexture(
+          submesh.textures.roughness,
+          index: 2)
+        
+        var material = submesh.material
+        encoder.setFragmentBytes(
+          &material,
+          length: MemoryLayout<Material>.stride,
+          index: MaterialBuffer.index)
 
         encoder.drawIndexedPrimitives(
           type: .triangle,

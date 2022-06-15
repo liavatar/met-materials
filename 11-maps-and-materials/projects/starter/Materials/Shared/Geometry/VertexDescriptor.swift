@@ -80,6 +80,26 @@ extension MDLVertexDescriptor {
         bufferIndex: ColorBuffer.index)
     vertexDescriptor.layouts[ColorBuffer.index]
       = MDLVertexBufferLayout(stride: MemoryLayout<float3>.stride)
+    
+    // Tangent and BiTangent
+    vertexDescriptor.attributes[Tangent.index] =
+      MDLVertexAttribute(
+        name: MDLVertexAttributeTangent,
+        format: .float3,
+        offset: 0,
+        bufferIndex: TangentBuffer.index)
+    vertexDescriptor.layouts[TangentBuffer.index]
+      = MDLVertexBufferLayout(stride: MemoryLayout<float3>.stride)
+    
+    vertexDescriptor.attributes[Bitangent.index] =
+      MDLVertexAttribute(
+        name: MDLVertexAttributeBitangent,
+        format: .float3,
+        offset: 0,
+        bufferIndex: BitangentBuffer.index)
+    vertexDescriptor.layouts[BitangentBuffer.index]
+      = MDLVertexBufferLayout(stride: MemoryLayout<float3>.stride)
+
     return vertexDescriptor
   }()
 }
