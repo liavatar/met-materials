@@ -71,6 +71,7 @@ struct GameScene {
     models = [treefir1, treefir2, treefir3, train, ground]
   }
 
+  // auto increment object id here, then pass it to Model id
   func createModel(name: String) -> Model {
     let model = Model(name: name, objectId: Self.objectId)
     Self.objectId += 1
