@@ -73,6 +73,8 @@ struct GameScene {
   var isPaused = false
 
   init() {
+    
+    camera.far = 10  // default 100 is bad for the shadow resolution
     camera.transform = defaultView
     camera.target = [0, 1, 0]
     camera.distance = 4

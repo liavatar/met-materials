@@ -38,6 +38,8 @@ struct ForwardRenderPass: RenderPass {
 
   var pipelineState: MTLRenderPipelineState
   let depthStencilState: MTLDepthStencilState?
+  
+  weak var shadowTexture: MTLTexture?
 
   init(view: MTKView) {
     pipelineState = PipelineStates.createForwardPSO(
@@ -69,6 +71,9 @@ struct ForwardRenderPass: RenderPass {
       &lights,
       length: MemoryLayout<Light>.stride * lights.count,
       index: LightBuffer.index)
+    
+    renderEncoder.setFragmentTexture(shadowTexture, index: 15)
+
     for model in scene.models {
       renderEncoder.pushDebugGroup(model.name)
       model.render(
@@ -84,6 +89,13 @@ struct ForwardRenderPass: RenderPass {
       uniforms: uniforms,
       model: scene.sun,
       color: [0.9, 0.8, 0.2])
+    
+    // debugging the camera view and sun's view for shadow press key 1..5
+    DebugCameraFrustum.draw(
+      encoder: renderEncoder,
+      scene: scene,
+      uniforms: uniforms)
+
     // End Debugging
     renderEncoder.endEncoding()
   }
