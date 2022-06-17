@@ -111,3 +111,4 @@ struct GBufferRenderPass: RenderPass {
     renderEncoder.endEncoding()
   }
 }
+
