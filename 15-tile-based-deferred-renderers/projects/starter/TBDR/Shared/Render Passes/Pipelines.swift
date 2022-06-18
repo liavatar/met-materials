@@ -80,7 +80,12 @@ enum PipelineStates {
     pipelineDescriptor.vertexFunction = vertexFunction
     pipelineDescriptor.fragmentFunction = fragmentFunction
     pipelineDescriptor.colorAttachments[0].pixelFormat = .invalid
-    pipelineDescriptor.setColorAttachmentPixelFormats()
+    if tiled {
+      pipelineDescriptor.colorAttachments[0].pixelFormat = colorPixelFormat
+    }
+    // In the previous chapter, your G-buffer render pass descriptor had no texture in colorAttachments[0]. However, when you use the view’s current render pass descriptor, colorAttachment[0] stores the view’s current drawable texture, so you match that texture’s pixel format.
+    pipelineDescriptor.setColorAttachmentPixelFormats() // This code sets the color pixel formats to match the render target textures.
+    
     pipelineDescriptor.depthAttachmentPixelFormat = .depth32Float
     pipelineDescriptor.vertexDescriptor =
       MTLVertexDescriptor.defaultLayout
@@ -98,6 +103,10 @@ enum PipelineStates {
     pipelineDescriptor.vertexFunction = vertexFunction
     pipelineDescriptor.fragmentFunction = fragmentFunction
     pipelineDescriptor.colorAttachments[0].pixelFormat = colorPixelFormat
+    if tiled {
+      pipelineDescriptor.setColorAttachmentPixelFormats()
+    }
+
     pipelineDescriptor.depthAttachmentPixelFormat = .depth32Float
     return createPSO(descriptor: pipelineDescriptor)
   }
@@ -113,6 +122,10 @@ enum PipelineStates {
     pipelineDescriptor.vertexFunction = vertexFunction
     pipelineDescriptor.fragmentFunction = fragmentFunction
     pipelineDescriptor.colorAttachments[0].pixelFormat = colorPixelFormat
+    if tiled {
+      pipelineDescriptor.setColorAttachmentPixelFormats()
+    }
+
     pipelineDescriptor.depthAttachmentPixelFormat = .depth32Float
     pipelineDescriptor.vertexDescriptor =
       MTLVertexDescriptor.defaultLayout
